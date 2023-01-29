@@ -1,7 +1,5 @@
 from enum import Enum
 
-BLANK = ""
-
 
 class Suits(Enum):
     """Card suits."""
