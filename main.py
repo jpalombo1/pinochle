@@ -8,9 +8,9 @@ from pinochle_play.team import Team
 
 # logging.basicConfig(filename="logging.log", level=logging.DEBUG, filemode="w+")
 logging.basicConfig(
-    format="%(asctime)s [%(filename)s:%(lineno)d] %(message)s",
+    format="%(levelname)s %(asctime)s [%(filename)s:%(lineno)d] %(message)s",
     stream=sys.stdout,
-    level=logging.INFO,
+    level=logging.DEBUG,
     filemode="w+",
 )
 

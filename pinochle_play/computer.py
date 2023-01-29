@@ -34,8 +34,12 @@ class Computer(Player):
 
     def call_trump(self) -> Suits:
         """Return player's preffered trump suit based on hand. Just returns suit with most cards in hand."""
-        counts = [self.hand.count(Card(suit, Values.NONE)) for suit in Suits]
-        return Suits[counts.index(max(counts))]
+        counts_map = {
+            suit: self.hand.count(Card(suit, Values.NONE))
+            for suit in Suits
+            if suit != Suits.NONE
+        }
+        return max(counts_map, key=lambda suit: counts_map.get(suit, 0))
 
     def play_card(
         self, trick: list[Card], used_cards: list[Card], trump_suit: Suits
@@ -126,7 +130,7 @@ class Computer(Player):
 
     def discard_move(self, trick_suit: Suits) -> Card:
         """Discard move when opposing team leading the trick. Dispose the least valued usable card you can."""
-        discard_card = Card(Suits, Values.ACE)
+        discard_card = Card(Suits.NONE, Values.ACE)
         use_discard = False
         for card in self.hand:
             if card.suit == trick_suit and not card > discard_card:
@@ -139,4 +143,4 @@ class Computer(Player):
         if use_discard:
             return discard_card
 
-        return Card(Suits.NONE, Suits.NONE)
+        return Card(Suits.NONE, Values.NONE)

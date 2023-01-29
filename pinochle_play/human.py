@@ -39,10 +39,12 @@ class Human(Player):
                     f"Hand score: {self.score_hand()}\n"
                     f"Choose from: {[suit.value for suit in Suits if suit != Suits.NONE]}: "
                 )
+                suit_map: dict[str, Suits] = {suit.value: suit for suit in Suits}
+                suit_val = suit_map[suit]
                 break
             except ValueError:
                 logging.info("Suit invalid! Try again!")
-        return suit
+        return suit_val
 
     def play_card(
         self, trick: list[Card], used_cards: list[Card], trump_suit: Suits
@@ -60,29 +62,26 @@ class Human(Player):
         self, trick: list[Card], used_cards: list[Card], trump_suit: Suits
     ) -> Card:
         """Make player choose the card to play. Make sure selection input is valid."""
+        allowed_card_idxs = self.allowed_cards(trick, self.hand, trump_suit)
+        allowed_cards = [self.hand[card_idx] for card_idx in allowed_card_idxs]
         while True:
             try:
-                card_index = (
-                    int(
-                        input(
-                            f"Player: {self.player_name}\n"
-                            f"Trump suit: {trump_suit} \n"
-                            f"Current trick is {trick} \n"
-                            f"Used Cards: {used_cards}\n"
-                            f"Suggested Move: {1}\n"
-                            f"Choose card to use by number:\n"
-                            f"{', '.join([f'{idx+1}.{card}'for idx,card in enumerate(self.hand)])} "
-                        )
+                card_index = int(
+                    input(
+                        f"Player: {self.player_name}\n"
+                        f"Trump suit: {trump_suit} \n"
+                        f"Current trick is {trick} \n"
+                        f"Used Cards: {used_cards}\n"
+                        f"Allowed Moves: {allowed_cards} Indexes: {allowed_card_idxs}\n"
+                        f"Choose card to use by number:\n"
+                        f"{', '.join([f'{idx}.{card}'for idx,card in enumerate(self.hand)])} "
                     )
-                    - 1
                 )
                 if not isinstance(card_index, int):
                     raise ValueError("Please enter a valid number for card to choose.")
                 if card_index not in range(0, len(self.hand)):
                     raise ValueError("Please enter a number in range within your hand.")
-                if not self.allowed_move(
-                    trick, self.hand, self.hand[card_index], trump_suit
-                ):
+                if self.hand[card_index] not in allowed_cards:
                     raise ValueError(
                         "Move is not allowed in this trick, please move again."
                     )
@@ -90,3 +89,13 @@ class Human(Player):
             except ValueError:
                 logging.info("Invalid card choice, try again")
         return self.hand[card_index]
+
+    def allowed_cards(
+        self, trick: list[Card], hand: list[Card], trump_suit: Suits
+    ) -> list[int]:
+        """Get all card indexes allowed to be played."""
+        return [
+            card_idx
+            for card_idx, card in enumerate(self.hand)
+            if self.allowed_move(trick, hand, card, trump_suit)
+        ]

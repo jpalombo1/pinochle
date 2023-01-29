@@ -16,7 +16,7 @@ class Team:
 
     team_num: int
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
 
         Attributes
@@ -46,7 +46,7 @@ class Team:
             self.total_score += self.round_score
         self.round_score = 0
 
-    def add_score(self, score: int):
+    def add_score(self, score: int) -> None:
         """Add to round score based on both players meld, tricks won in round"""
         self.round_score += score
 
@@ -54,11 +54,11 @@ class Team:
         """Check if given player on team."""
         return player in self.players
 
-    def set_bid(self, bid: int):
+    def set_bid(self, bid: int) -> None:
         """Set team bid needed to beat for trump team."""
         self.team_bid = bid
 
-    def reset_round(self):
+    def reset_round(self) -> None:
         """At end of round reset team bid and round score."""
         self.team_bid = 0
         self.round_score = 0

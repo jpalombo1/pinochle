@@ -46,7 +46,7 @@ class Game4Player:
                 self.players.append(self.teams[team_num].players[player_num])
         logging.info(f"All players {self.players}")
 
-    def play_round(self):
+    def play_round(self) -> None:
         """Execute full round of pinochle."""
         self.shuffle_cards()
         self.deal_cards()
@@ -76,7 +76,7 @@ class Game4Player:
     def bid_round(self) -> None:
         """Players submit bids based on hands. Highest bid calls trump, default is last player before dealer. Set bid to meet."""
         dealer = self.round_num % len(self.players)
-        bids_sofar = []
+        bids_sofar: list[int] = []
         self.trump_player = (dealer + len(self.players) - 1) % len(self.players)
         for idx in range(len(self.players)):
             player_go = (dealer + idx) % len(self.players)
@@ -93,7 +93,7 @@ class Game4Player:
         )
         self.meet_bid = max(bids_sofar)
 
-    def score_hands(self):
+    def score_hands(self) -> None:
         """Score meld hands and set team meet bid for team which trump player is on."""
         for player in self.players:
             for team in self.teams:
@@ -105,11 +105,11 @@ class Game4Player:
             if team.on_team(self.players[self.trump_player]):
                 team.set_bid(self.meet_bid)
 
-    def tricks(self):
+    def tricks(self) -> None:
         """Play tricks. Number of tricks given by cards / players, take turn starting with trump player then with each trick winner."""
         num_tricks = len(self.deck) // len(self.players)
         player_go: int = self.trump_player
-        for trick in range(num_tricks):
+        for _ in range(num_tricks):
             trick: list[Card] = []
             for idx in range(len(self.players)):
                 turn = (player_go + idx) % len(self.players)
@@ -146,7 +146,7 @@ class Game4Player:
             return True
         return False
 
-    def score_tricks(self, player: int, trick: list[Card]):
+    def score_tricks(self, player: int, trick: list[Card]) -> None:
         """Score tricks for each team. Adjust final score based on making the bid."""
         point_values = [Values.ACE, Values.TEN, Values.KING]
         trick_points = 0
@@ -164,7 +164,7 @@ class Game4Player:
                     f"Team {team.team_num} Score {team.round_score} , gained {trick_points} trick points"
                 )
 
-    def cleanup_round(self):
+    def cleanup_round(self) -> None:
         """Reset roubd for players and teams."""
         for player in self.players:
             player.reset_round()
@@ -183,7 +183,7 @@ class Game4Player:
         self.meet_bid = 0
         self.used_cards = []
 
-    def play(self, games: int = 1, max_score: int = 120):
+    def play(self, games: int = 1, max_score: int = 120) -> None:
         """Overall play method to keep playing rounds until max score reached for given number of games."""
         for _ in range(games):
             logging.debug(f"{self.players}")

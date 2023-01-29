@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from abc import ABC, abstractclassmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from pinochle_play.card import Card
@@ -48,19 +48,19 @@ class Player(ABC):
         """Remove card from hand after playing it."""
         self.hand.pop(self.hand.index(use_card))
 
-    @abstractclassmethod
+    @abstractmethod
     def bid(self, bids_sofar: list[int]) -> int:
         """Play bid method."""
         pass
 
-    @abstractclassmethod
+    @abstractmethod
     def call_trump(self) -> Suits:
         """Return player's preffered trump suit based on hand."""
         pass
 
-    @abstractclassmethod
+    @abstractmethod
     def play_card(
-        self, trick: list[Card], used_cards: list[Card], trump_suit: str
+        self, trick: list[Card], used_cards: list[Card], trump_suit: Suits
     ) -> Card:
         """Computer or user plays card."""
         pass
@@ -72,7 +72,7 @@ class Player(ABC):
         hand_score += self._score_meld(trump_suit)
         hand_score += self._score_marraiges(trump_suit)
         hand_score += self._score_runs()
-        hand_score = self._score_4kind()
+        hand_score += self._score_4kind()
         return hand_score
 
     def _score_pinochle(self) -> int:
@@ -81,11 +81,15 @@ class Player(ABC):
             Card(Suits.DIAMOND, Values.JACK) in self.hand
             and Card(Suits.CLUB, Values.QUEEN) in self.hand
         ):
+            logging.debug("Pinochle, 4 points total.")
             return 4
         return 0
 
     def _score_meld(self, trump_suit: Suits) -> int:
         """Score number of 9s in hand that match trump."""
+        logging.debug(
+            f"Meld suit {trump_suit.value}, {self.hand.count(Card(trump_suit, Values.NINE))} points total."
+        )
         return self.hand.count(Card(trump_suit, Values.NINE))
 
     def _score_marraiges(self, trump_suit: Suits) -> int:
@@ -99,6 +103,9 @@ class Player(ABC):
                 if suit == Suits.NONE:
                     continue
                 marraige_score += 4 if suit == trump_suit else 2
+                logging.debug(
+                    f"Marraige suit {suit.value}, {marraige_score} points total."
+                )
         return marraige_score
 
     def _score_runs(self) -> int:
@@ -115,6 +122,7 @@ class Player(ABC):
                 if suit == Suits.NONE:
                     continue
                 run_score += 15
+                logging.debug(f"Run suit {suit.value}, {run_score} points total.")
         return run_score
 
     def _score_4kind(self) -> int:
@@ -133,11 +141,12 @@ class Player(ABC):
                 and Card(Suits.HEART, value) in self.hand
                 and Card(Suits.SPADE, value) in self.hand
             ):
+                logging.debug(f"4 of a Kind {value} {point_value} points added.")
                 kind_score += point_value
         return kind_score
 
     def allowed_move(
-        self, trick: list[Card], hand: list[Card], card: Card, trump_suit: str
+        self, trick: list[Card], hand: list[Card], card: Card, trump_suit: Suits
     ) -> bool:
         """Determine if player is making legal move."""
         # TODO Make logic
@@ -161,7 +170,7 @@ class Player(ABC):
             logging.debug("No trump or trick suit to play, anything legal")
             return True
         logging.info(
-            f"Playing card with {card.suit} even though hand has {num_trick_suit} cards of {trick_suit} and {num_trump_suit} cards of {trump_suit}. Illegal!"
+            f"Playing card with {card.suit} even though hand has {num_trick_suit} cards of {trick_suit.value} and {num_trump_suit} cards of {trump_suit.value}. Illegal!"
         )
         return False
 
