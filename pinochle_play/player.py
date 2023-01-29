@@ -20,7 +20,7 @@ class Player(ABC):
 
     player_name: str
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Define class attributes post init.
 
